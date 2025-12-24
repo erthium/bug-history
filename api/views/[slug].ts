@@ -9,7 +9,7 @@ const redis = Redis.fromEnv();
 
 interface ViewData {
   count: number;
-  viewers: string[];
+  viewers: string[]; // Stores hashed IPs, not raw IPs
 }
 
 function getClientIP(request: Request): string {
@@ -28,6 +28,15 @@ function getClientIP(request: Request): string {
 
   // Last resort fallback
   return 'unknown';
+}
+
+async function hashIP(ip: string): Promise<string> {
+  const salt = process.env.IP_HASH_SALT ?? 'null';
+  const encoder = new TextEncoder();
+  const data = encoder.encode(salt + ip);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 export default async function handler(request: Request): Promise<Response> {
@@ -67,6 +76,7 @@ export default async function handler(request: Request): Promise<Response> {
   if (request.method === 'POST') {
     try {
       const clientIP = getClientIP(request);
+      const hashedIP = await hashIP(clientIP);
 
       // Get current data
       let data = await redis.get<ViewData>(viewsKey);
@@ -75,10 +85,10 @@ export default async function handler(request: Request): Promise<Response> {
         data = { count: 0, viewers: [] };
       }
 
-      // Check if this IP has already viewed this post
-      if (!data.viewers.includes(clientIP)) {
+      // Check if this hashed IP has already viewed this post
+      if (!data.viewers.includes(hashedIP)) {
         data.count += 1;
-        data.viewers.push(clientIP);
+        data.viewers.push(hashedIP);
 
         // Save updated data
         await redis.set(viewsKey, data);
