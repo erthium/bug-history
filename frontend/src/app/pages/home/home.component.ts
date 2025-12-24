@@ -39,9 +39,23 @@ import { BlogService, BlogPost } from '../../services/blog.service';
 										<h3 class="text-lg font-medium text-text-primary group-hover:text-accent-primary transition-colors">
 											{{ post.title }}
 										</h3>
-										<time class="text-sm text-text-muted whitespace-nowrap">
-											{{ post.date }}
-										</time>
+										<div class="flex items-center gap-3 text-sm text-text-muted whitespace-nowrap">
+											@if (hasViewCounts()) {
+												<div class="flex items-center gap-1">
+													<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+														/>
+													</svg>
+													<span>{{ getViewCount(post.slug) }}</span>
+												</div>
+											}
+											<time>{{ post.date }}</time>
+										</div>
 									</div>
 									<p class="text-text-secondary text-sm leading-relaxed mb-4">
 										{{ post.summary }}
@@ -67,12 +81,31 @@ export class HomeComponent implements OnInit {
 	private blogService = inject(BlogService);
 
 	posts = signal<BlogPost[]>([]);
+	viewCounts = signal<Record<string, number> | null>(null);
 	loading = signal(true);
 
 	ngOnInit() {
+		// Fetch posts and view counts in parallel
 		this.blogService.getBlogList().subscribe((posts) => {
 			this.posts.set(posts);
 			this.loading.set(false);
 		});
+
+		this.blogService.getAllViewCounts().subscribe((counts) => {
+			// Only set view counts if API responded successfully
+			if (counts !== null) {
+				this.viewCounts.set(counts);
+			}
+		});
+	}
+
+	getViewCount(slug: string): number | null {
+		const counts = this.viewCounts();
+		if (counts === null) return null;
+		return counts[slug] ?? 0;
+	}
+
+	hasViewCounts(): boolean {
+		return this.viewCounts() !== null;
 	}
 }

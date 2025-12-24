@@ -23,6 +23,16 @@ export interface BlogPost {
 	summary: string;
 	tags: string[];
 	content?: string;
+	viewCount?: number;
+}
+
+export interface ViewCountResponse {
+	count: number;
+	incremented?: boolean;
+}
+
+export interface AllViewsResponse {
+	views: Record<string, number>;
 }
 
 interface FrontmatterResult {
@@ -112,6 +122,35 @@ export class BlogService {
 					html: marked.parse(content) as string,
 				};
 			}),
+			catchError(() => of(null))
+		);
+	}
+
+	/**
+	 * Get the view count for a specific blog post
+	 */
+	getViewCount(slug: string): Observable<number> {
+		return this.http.get<ViewCountResponse>(`/api/views/${slug}`).pipe(
+			map((response) => response.count),
+			catchError(() => of(0))
+		);
+	}
+
+	/**
+	 * Increment the view count for a blog post (only increments for unique IPs)
+	 * Returns null if the API is unavailable
+	 */
+	trackView(slug: string): Observable<ViewCountResponse | null> {
+		return this.http.post<ViewCountResponse>(`/api/views/${slug}`, {}).pipe(catchError(() => of(null)));
+	}
+
+	/**
+	 * Get view counts for all blog posts (used on home page)
+	 * Returns null if the API is unavailable
+	 */
+	getAllViewCounts(): Observable<Record<string, number> | null> {
+		return this.http.get<AllViewsResponse>('/api/views/all').pipe(
+			map((response) => response.views),
 			catchError(() => of(null))
 		);
 	}

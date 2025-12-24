@@ -1,0 +1,9 @@
+{
+  "name": "bug-history",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root package for Vercel deployment - contains API dependencies",
+  "dependencies": {
+    "@vercel/kv": "^2.0.0"
+  }
+}
