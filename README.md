@@ -2,6 +2,12 @@
 
 A blog documenting bugs, edge cases, and difficult situations encountered throughout software engineering.
 
+## Licence
+
+This project is licensed under the [GNU GPL-3.0](LICENSE) license.
+
+Main purpose is to provide free and open-source software. Feel free to use the source code. Referring to the repository would be very much appreciated.
+
 ## Project Structure
 
 ```
