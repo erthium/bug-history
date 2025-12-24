@@ -1,8 +1,11 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 
 export const config = {
   runtime: 'edge',
 };
+
+// Initialize Redis client - reads UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN automatically
+const redis = Redis.fromEnv();
 
 interface ViewData {
   count: number;
@@ -43,7 +46,7 @@ export default async function handler(request: Request): Promise<Response> {
   // Handle GET request - return current view count
   if (request.method === 'GET') {
     try {
-      const data = await kv.get<ViewData>(viewsKey);
+      const data = await redis.get<ViewData>(viewsKey);
       return new Response(JSON.stringify({ count: data?.count || 0 }), {
         status: 200,
         headers: {
@@ -66,7 +69,7 @@ export default async function handler(request: Request): Promise<Response> {
       const clientIP = getClientIP(request);
 
       // Get current data
-      let data = await kv.get<ViewData>(viewsKey);
+      let data = await redis.get<ViewData>(viewsKey);
 
       if (!data) {
         data = { count: 0, viewers: [] };
@@ -78,7 +81,7 @@ export default async function handler(request: Request): Promise<Response> {
         data.viewers.push(clientIP);
 
         // Save updated data
-        await kv.set(viewsKey, data);
+        await redis.set(viewsKey, data);
 
         return new Response(
           JSON.stringify({ count: data.count, incremented: true }),
@@ -112,4 +115,3 @@ export default async function handler(request: Request): Promise<Response> {
     headers: { 'Content-Type': 'application/json' },
   });
 }
-
