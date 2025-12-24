@@ -1,59 +1,73 @@
-# BugHistory
+# Bug History Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
+Angular application for the Bug History blog.
 
-## Development server
+## Requirements
 
-To start a local development server, run:
+- Node.js 18+ (v22.21.1 used)
+- npm 10+ (v10.9.4 used)
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Setup
 
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Development
 
 ```bash
-ng generate --help
+npm run start
 ```
 
-## Building
+Runs at `http://localhost:4200`.
 
-To build the project run:
+## Build
 
 ```bash
-ng build
+npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Output is generated in `dist/bug-history/browser`.
 
-## Running unit tests
+## Project Structure
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
+```
+src/
+├── app/
+│   ├── components/          # Shared components
+│   │   ├── header/
+│   │   └── theme-selector/
+│   ├── pages/               # Route components
+│   │   ├── blog/            # Individual blog post
+│   │   └── home/            # Blog listing
+│   ├── services/
+│   │   ├── blog.service.ts  # Blog fetching and view counts
+│   │   └── theme.service.ts # Theme management
+│   ├── app.routes.ts
+│   └── app.ts
+├── index.html
+├── main.ts
+└── styles.css
+public/
+└── blogs/                   # Markdown blog posts
 ```
 
-## Running end-to-end tests
+## Adding Blog Posts
 
-For end-to-end (e2e) testing, run:
+1. Create a markdown file in `public/blogs/` with frontmatter:
+   ```markdown
+   ---
+   title: "Post Title"
+   date: "2024-01-15"
+   summary: "Brief description"
+   tags: [tag1, tag2]
+   ---
 
-```bash
-ng e2e
-```
+   Post content here...
+   ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+2. Add the slug to `blogSlugs` array in `src/app/services/blog.service.ts`.
 
-## Additional Resources
+## View Count Integration
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The frontend calls `/api/views/{slug}` endpoints to track and display view counts. These endpoints are handled by Vercel Serverless Functions. When the API is unavailable, view counts are hidden from the UI.
