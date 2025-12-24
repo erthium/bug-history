@@ -1,0 +1,19 @@
+# Build outputs
+dist/
+.angular/
+
+# Dependencies
+node_modules/
+
+# Coverage
+coverage/
+
+# IDE
+.idea/
+.vscode/
+
+# Misc
+*.min.js
+*.min.css
+package-lock.json
+

@@ -1,12 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { HeaderComponent } from './components/header/header.component';
+import { ThemeService } from './services/theme.service';
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+	selector: 'app-root',
+	imports: [RouterOutlet, HeaderComponent],
+	templateUrl: './app.html',
+	styleUrl: './app.css',
 })
 export class App {
-  protected readonly title = signal('bug-history');
+	// Inject to ensure theme is applied on startup
+	private themeService = inject(ThemeService);
 }
